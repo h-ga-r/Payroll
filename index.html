@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top" />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        background-color: #f4f4f4;
+      }
+      .container {
+        max-width: 600px;
+        margin: auto;
+        padding: 25px;
+        background-color: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+      h2 {
+        text-align: center;
+        color: #333;
+      }
+      .form-group {
+        margin-bottom: 20px;
+      }
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: bold;
+        color: #555;
+      }
+      input[type="number"],
+      select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        box-sizing: border-box;
+      }
+      .radio-group {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 20px;
+      }
+      .radio-group input[type="radio"] {
+        display: none;
+      }
+      .radio-group label {
+        flex-grow: 1;
+        text-align: center;
+        padding: 12px;
+        border: 2px solid #ccc;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+      .radio-group input[type="radio"]:checked + label {
+        background-color: #4caf50;
+        color: white;
+        border-color: #4caf50;
+      }
+      button {
+        width: 100%;
+        padding: 12px;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+        transition: background-color 0.3s ease;
+      }
+      button:hover {
+        background-color: #45a049;
+      }
+      #result {
+        margin-top: 25px;
+        padding: 20px;
+        background-color: #f0f0f0;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        text-align: center;
+        font-weight: bold;
+        color: #333;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>給与計算アプリ</h2>
+
+      <div class="form-group">
+        <label for="staff-select">スタッフ名:</label>
+        <select id="staff-select">
+          <option value="">スタッフを選択してください</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>雇用形態:</label>
+        <div class="radio-group">
+          <input type="radio" id="type-staff" name="employment-type" value="staff" checked />
+          <label for="type-staff">スタッフ</label>
+          <input type="radio" id="type-parttime" name="employment-type" value="parttime" />
+          <label for="type-parttime">アルバイト</label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="weekday-hours">平日労働時間 (時間):</label>
+        <input type="number" id="weekday-hours" value="0" />
+      </div>
+
+      <div class="form-group">
+        <label for="weekday-night-hours">平日深夜労働時間 (時間):</label>
+        <input type="number" id="weekday-night-hours" value="0" />
+      </div>
+
+      <div class="form-group">
+        <label for="weekend-hours">土日労働時間 (時間):</label>
+        <input type="number" id="weekend-hours" value="0" />
+      </div>
+
+      <div class="form-group">
+        <label for="weekend-night-hours">土日深夜労働時間 (時間):</label>
+        <input type="number" id="weekend-night-hours" value="0" />
+      </div>
+
+      <div class="form-group">
+        <label for="work-days">日数:</label>
+        <input type="number" id="work-days" value="0" />
+      </div>
+
+      <button onclick="calculateAndSave()">計算して保存</button>
+      <div id="result">ここに計算結果が表示されます。</div>
+    </div>
+
+    <script>
+      // ページ読み込み時にスタッフ名のドロップダウンを動的に作成
+      google.script.run
+        .withSuccessHandler(populateStaffDropdown)
+        .getStaffNames();
+
+      function populateStaffDropdown(staffNames) {
+        const dropdown = document.getElementById('staff-select');
+        staffNames.forEach((name) => {
+          const option = document.createElement('option');
+          option.text = name;
+          option.value = name;
+          dropdown.add(option);
+        });
+      }
+
+      function calculateAndSave() {
+        // フォームから入力値を取得
+        const staffName = document.getElementById('staff-select').value;
+        const employmentType = document.querySelector('input[name="employment-type"]:checked').value;
+        const weekdayHours = parseFloat(document.getElementById('weekday-hours').value) || 0;
+        const weekdayNightHours = parseFloat(document.getElementById('weekday-night-hours').value) || 0;
+        const weekendHours = parseFloat(document.getElementById('weekend-hours').value) || 0;
+        const weekendNightHours = parseFloat(document.getElementById('weekend-night-hours').value) || 0;
+        const workDays = parseInt(document.getElementById('work-days').value) || 0;
+
+        // 入力値のバリデーション
+        if (!staffName) {
+          document.getElementById('result').innerText = 'スタッフ名を選択してください。';
+          return;
+        }
+
+        const formData = {
+          staffName,
+          employmentType,
+          weekdayHours,
+          weekdayNightHours,
+          weekendHours,
+          weekendNightHours,
+          workDays
+        };
+
+        // GASのバックエンド関数を呼び出す
+        google.script.run
+          .withSuccessHandler(showResult)
+          .calculateAndSave(formData);
+      }
+
+      function showResult(result) {
+        document.getElementById('result').innerText = result.message;
+      }
+    </script>
+  </body>
+</html>
