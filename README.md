@@ -8,7 +8,9 @@
 
 🛠 技術スタック (Tech Stack）
 
-　ロジック/処理: Google Apps Script (GAS)
+　ロジック/処理: 
+ 
+ 　Google Apps Script (GAS)
 
 データ管理:
 
